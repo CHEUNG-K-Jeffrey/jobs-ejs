@@ -1,6 +1,5 @@
 import { type Model, Schema, model } from "mongoose";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import type ms from "ms";
 
 interface IUser {
@@ -43,16 +42,6 @@ UserSchema.pre("save", async function () {
 	const salt = await bcrypt.genSalt(10);
 	this.password = await bcrypt.hash(this.password, salt);
 });
-
-UserSchema.methods.createJWT = function () {
-	return jwt.sign(
-		{ userId: this._id, name: this.name },
-		process.env.JWT_SECRET,
-		{
-			expiresIn: process.env.JWT_LIFETIME as ms.StringValue,
-		},
-	);
-};
 
 UserSchema.methods.comparePassword = async function (
 	candidatePassword: string,

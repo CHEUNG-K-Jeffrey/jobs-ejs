@@ -5,8 +5,15 @@
 	"type": "module",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"dev": "node --watch app.js",
-		"run": "node app.js"
+		"dev": "tsx --watch app.js",
+		"run": "tsc --rewriteRelativeImportExtensions app.js",
+		"type-check": "tsc --noEmit"
+	},
+	"simple-git-hooks": {
+		"pre-commit": [
+			"npx biome check --staged",
+			"npm run type-check"
+		]
 	},
 	"repository": {
 		"type": "git",
@@ -21,7 +28,13 @@
 	"description": "",
 	"devDependencies": {
 		"@biomejs/biome": "1.9.4",
-		"@types/node": "^22.15.29"
+		"@types/connect-flash": "^0.0.40",
+		"@types/express": "^5.0.3",
+		"@types/ms": "^2.1.0",
+		"@types/node": "^22.15.29",
+		"@types/passport-local": "^1.0.38",
+		"tsx": "^4.19.4",
+		"typescript": "^5.8.3"
 	},
 	"dependencies": {
 		"bcryptjs": "^3.0.2",
