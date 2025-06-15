@@ -1,6 +1,7 @@
 import express, {
 	type NextFunction,
 	type Request,
+	type RequestHandler,
 	type Response,
 } from "express";
 import auth from "./middleware/auth.js";
@@ -15,6 +16,8 @@ import connectMongodbSession from "connect-mongodb-session";
 import connectFlash from "connect-flash";
 import storeLocals from "./middleware/storeLocals.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
+import csrf from "host-csrf";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
@@ -38,13 +41,23 @@ const sessionParms = {
 	cookie: { secure: false, sameSite: "strict" },
 };
 
+app.set("view engine", "ejs");
+app.use(cookieParser(process.env.SESSION_SECRET));
+app.use(bodyParser.urlencoded({ extended: true }));
+let csrf_development_mode = true;
 if (app.get("env") === "production") {
+	csrf_development_mode = false;
 	app.set("trust proxy", 1); // trust first proxy
 	sessionParms.cookie.secure = true; // serve secure cookies
 }
 
-app.set("view engine", "ejs");
-app.use(bodyParser.urlencoded({ extended: true }));
+const csrf_options = {
+	protected_operations: ["PATCH"],
+	protected_content_types: ["application/json"],
+	development_mode: csrf_development_mode,
+};
+const csrf_middleware = csrf(csrf_options) as RequestHandler; //initialise and return middlware
+app.use(csrf_middleware);
 
 app.use(session(sessionParms));
 
