@@ -4,13 +4,16 @@ import secretWordRouter from "./routes/secretWord.js";
 import passport from "passport";
 import passportInit from "./passport/passportInit.js";
 import connectDB from "./db/connect.js";
-
-const app = express();
-
 import "dotenv/config"; // to load the .env file into the process.env object
 import session from "express-session";
 import bodyParser from "body-parser";
 import connectMongodbSession from "connect-mongodb-session";
+import connectFlash from "connect-flash";
+import storeLocals from "./middleware/storeLocals.js";
+import sessionRoutes from "./routes/sessionRoutes.js";
+
+const app = express();
+
 const MongoDBStore = connectMongodbSession(session);
 const url = process.env.MONGO_URI;
 
@@ -41,8 +44,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(session(sessionParms));
 
-import connectFlash from "connect-flash";
-import storeLocals from "./middleware/storeLocals.js";
 app.use(connectFlash());
 app.use(storeLocals);
 
@@ -54,7 +55,6 @@ app.get("/", (req, res) => {
 	res.render("index");
 });
 
-import sessionRoutes from "./routes/sessionRoutes.js";
 app.use("/sessions", sessionRoutes);
 
 // let secretWord = "syzygy"; <-- comment this out or remove this line
