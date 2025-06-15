@@ -1,4 +1,8 @@
-import express from "express";
+import express, {
+	type NextFunction,
+	type Request,
+	type Response,
+} from "express";
 import auth from "./middleware/auth.js";
 import secretWordRouter from "./routes/secretWord.js";
 import passport from "passport";
@@ -65,7 +69,7 @@ app.use((req, res) => {
 	res.status(404).send(`That page (${req.url}) was not found.`);
 });
 
-app.use((err, req, res, next) => {
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 	res.status(500).send(err.message);
 	console.log(err);
 });
