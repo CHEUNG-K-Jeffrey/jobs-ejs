@@ -28,7 +28,8 @@ const passportInit = () => {
 	);
 
 	passport.serializeUser(async (user: UserRequest, done) => {
-		done(null, user.id);
+		console.log(user._id);
+		done(null, user._id);
 	});
 
 	passport.deserializeUser(async (id, done) => {

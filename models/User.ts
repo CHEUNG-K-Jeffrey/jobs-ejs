@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import type ms from "ms";
 
 interface IUser {
+	_id: string;
 	name: string;
 	email: string;
 	password: string;

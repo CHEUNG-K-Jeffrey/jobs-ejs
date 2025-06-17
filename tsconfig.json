@@ -24,6 +24,8 @@
 
 		"outDir": "dist",
 
-		"target": "ES2024"
+		"target": "ES2024",
+
+		"typeRoots": ["./node_modules/@types", "./types"]
 	}
 }

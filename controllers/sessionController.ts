@@ -33,7 +33,8 @@ const registerDo = async (
 		console.log("Error");
 		return res.render("register");
 	}
-	res.redirect("/");
+
+	res.render("index");
 };
 
 const logoff = (req: SessionRequest, res: Response) => {
@@ -47,7 +48,8 @@ const logoff = (req: SessionRequest, res: Response) => {
 
 const logonShow = (req: Request, res: Response) => {
 	if (req.user) {
-		return res.redirect("/");
+		req.flash("YOu logged in");
+		return res.render("index");
 	}
 	return res.render("logon");
 };

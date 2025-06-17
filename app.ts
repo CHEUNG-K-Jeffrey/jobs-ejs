@@ -18,6 +18,7 @@ import storeLocals from "./middleware/storeLocals.js";
 import sessionRoutes from "./routes/sessionRoutes.js";
 import csrf from "host-csrf";
 import cookieParser from "cookie-parser";
+import jobsRouter from "./routes/jobs.js";
 
 const app = express();
 
@@ -69,8 +70,10 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get("/", (req, res) => {
-	res.render("index");
+	res.render("index", { user: req.user });
 });
+
+app.use("/jobs", jobsRouter);
 
 app.use("/sessions", sessionRoutes);
 
