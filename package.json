@@ -10,7 +10,10 @@
 		"type-check": "tsc --noEmit"
 	},
 	"simple-git-hooks": {
-		"pre-commit": ["npx biome check --staged", "npm run type-check"]
+		"pre-commit": [
+			"npx biome check --staged",
+			"npm run type-check"
+		]
 	},
 	"repository": {
 		"type": "git",

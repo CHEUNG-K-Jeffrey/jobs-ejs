@@ -19,8 +19,26 @@ import sessionRoutes from "./routes/sessionRoutes.js";
 import csrf from "host-csrf";
 import cookieParser from "cookie-parser";
 import jobsRouter from "./routes/jobs.js";
+import helmet from "helmet";
+import { rateLimit } from "express-rate-limit";
+import xssClean from "xss-clean";
+
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+	standardHeaders: "draft-8", // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+	// store: ... , // Redis, Memcached, etc. See below.
+});
 
 const app = express();
+
+app.use(xssClean());
+
+// Apply the rate limiting middleware to all requests.
+app.use(limiter);
+
+app.use(helmet());
 
 const MongoDBStore = connectMongodbSession(session);
 const url = process.env.MONGO_URI;
