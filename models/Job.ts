@@ -1,4 +1,16 @@
-import { Schema, Types, model } from "mongoose";
+import { type Model, Schema, Types, model } from "mongoose";
+
+export interface IJob {
+	company: string;
+	position: string;
+	status: string;
+	createdBy: string;
+}
+
+// biome-ignore lint/suspicious/noEmptyInterface: Stub
+interface IJobMethods {}
+
+type JobModel = Model<IJob, unknown, IJobMethods>;
 
 const JobSchema = new Schema(
 	{
@@ -26,4 +38,4 @@ const JobSchema = new Schema(
 	{ timestamps: true },
 );
 
-export default model("Job", JobSchema);
+export default model<IJob, JobModel>("Job", JobSchema);

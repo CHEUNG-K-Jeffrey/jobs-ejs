@@ -14,5 +14,5 @@ export type FlashRequest = Request & {
 };
 
 export type User = {
-	id: string;
+	_id: string;
 };

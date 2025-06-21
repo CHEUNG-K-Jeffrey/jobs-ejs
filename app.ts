@@ -1,16 +1,45 @@
-import express from "express";
+import express, {
+	type NextFunction,
+	type Request,
+	type RequestHandler,
+	type Response,
+} from "express";
 import auth from "./middleware/auth.js";
 import secretWordRouter from "./routes/secretWord.js";
 import passport from "passport";
 import passportInit from "./passport/passportInit.js";
 import connectDB from "./db/connect.js";
-
-const app = express();
-
 import "dotenv/config"; // to load the .env file into the process.env object
 import session from "express-session";
 import bodyParser from "body-parser";
 import connectMongodbSession from "connect-mongodb-session";
+import connectFlash from "connect-flash";
+import storeLocals from "./middleware/storeLocals.js";
+import sessionRoutes from "./routes/sessionRoutes.js";
+import csrf from "host-csrf";
+import cookieParser from "cookie-parser";
+import jobsRouter from "./routes/jobs.js";
+import helmet from "helmet";
+import { rateLimit } from "express-rate-limit";
+import xssClean from "xss-clean";
+
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+	standardHeaders: "draft-8", // draft-6: `RateLimit-*` headers; draft-7 & draft-8: combined `RateLimit` header
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
+	// store: ... , // Redis, Memcached, etc. See below.
+});
+
+const app = express();
+
+app.use(xssClean());
+
+// Apply the rate limiting middleware to all requests.
+app.use(limiter);
+
+app.use(helmet());
+
 const MongoDBStore = connectMongodbSession(session);
 const url = process.env.MONGO_URI;
 
@@ -31,18 +60,26 @@ const sessionParms = {
 	cookie: { secure: false, sameSite: "strict" },
 };
 
+app.set("view engine", "ejs");
+app.use(cookieParser(process.env.SESSION_SECRET));
+app.use(bodyParser.urlencoded({ extended: true }));
+let csrf_development_mode = true;
 if (app.get("env") === "production") {
+	csrf_development_mode = false;
 	app.set("trust proxy", 1); // trust first proxy
 	sessionParms.cookie.secure = true; // serve secure cookies
 }
 
-app.set("view engine", "ejs");
-app.use(bodyParser.urlencoded({ extended: true }));
+const csrf_options = {
+	protected_operations: ["PATCH"],
+	protected_content_types: ["application/json"],
+	development_mode: csrf_development_mode,
+};
+const csrf_middleware = csrf(csrf_options) as RequestHandler; //initialise and return middlware
+app.use(csrf_middleware);
 
 app.use(session(sessionParms));
 
-import connectFlash from "connect-flash";
-import storeLocals from "./middleware/storeLocals.js";
 app.use(connectFlash());
 app.use(storeLocals);
 
@@ -51,10 +88,11 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get("/", (req, res) => {
-	res.render("index");
+	res.render("index", { user: req.user });
 });
 
-import sessionRoutes from "./routes/sessionRoutes.js";
+app.use("/jobs", jobsRouter);
+
 app.use("/sessions", sessionRoutes);
 
 // let secretWord = "syzygy"; <-- comment this out or remove this line
@@ -65,7 +103,7 @@ app.use((req, res) => {
 	res.status(404).send(`That page (${req.url}) was not found.`);
 });
 
-app.use((err, req, res, next) => {
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 	res.status(500).send(err.message);
 	console.log(err);
 });

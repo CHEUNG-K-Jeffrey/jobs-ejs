@@ -5,8 +5,8 @@
 	"type": "module",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"dev": "tsx --watch app.js",
-		"run": "tsc --rewriteRelativeImportExtensions app.js",
+		"dev": "tsx --watch app.ts",
+		"run": "tsc --rewriteRelativeImportExtensions app.ts",
 		"type-check": "tsc --noEmit"
 	},
 	"simple-git-hooks": {
